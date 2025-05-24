@@ -1,0 +1,321 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EV Booking</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-left: 60px;
+      position: relative;
+      background-image: url('https://cms.qz.com/wp-content/uploads/2018/06/Ather.jpg?quality=75&strip=all&w=3200&h=1800');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: #8BC63F;
+      transition: 2s;
+    }
+
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      background-color: rgba(154, 205, 50, 0.15); /* reduced transparency */
+      z-index: 0;
+      border: 2px solid black;
+    }
+
+    .img{
+      margin-left: 400px;
+      width: 720px;
+      height: 700px;
+      border: 2px solid black;
+    }
+     .hero-banner{
+      --transition-1: 0.25s ease;
+      --transition-2: 0.5s ease;
+      --cubic-out: cubic-bezier(0.33, 0.85, 0.4, 0.96);
+     }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      background: white;
+      padding: 40px 50px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      border: 2px solid red;
+    }
+
+    h1 {
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #218838;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="overlay"></div>
+
+  <div class="container">
+    <h1>Find the nearest EV<br>charging station</h1>
+    <input type="text" placeholder="From (Pickup location)" id="fromLocation" />
+    <input type="text" placeholder="To (Drop-off location)" id="toLocation" />
+    <button class="btn" onclick="goToBooking()">Book Now</button>
+  </div>
+
+
+   </div>
+
+          <figure class="hero-banner" data-reveal="right">
+            <img src="./assets/images/hero-banner.png" width="1116" height="766" alt="Bike" class="w-100">
+          </figure>
+
+    </div>
+
+  <script>
+    function goToBooking() {
+      const from = document.getElementById("fromLocation").value.trim();
+      const to = document.getElementById("toLocation").value.trim();
+
+      if (from === "" || to === "") {
+        alert("Please fill in both locations before booking.");
+      } else {
+        sessionStorage.setItem("fromLocation", from);
+        sessionStorage.setItem("toLocation", to);
+        window.location.href = "booking.html";
+      }
+    }
+  </script>
+
+</body>
+</html>
+ -->
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EV Charging Stations</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 300px;
+      padding: 16px;
+      overflow-y: auto;
+      background-color: #f9f9f9;
+      border-right: 1px solid #ccc;
+    }
+    #map {
+      flex: 1;
+    }
+    .station {
+      padding: 10px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .station.available {
+      background-color: #e0fce0;
+    }
+    .station.busy {
+      background-color: #fde0e0;
+    }
+    .hidden {
+      display: none;
+    }
+    #reservation-image {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 10px;
+      border: 1px solid #ccc;
+      z-index: 1000;
+    }
+    #reservation-image img {
+      max-width: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Trip Details</h2>
+    <p><strong>From:</strong> <span id="from-location">Bhopal</span></p>
+    <p><strong>To:</strong> <span id="to-location">Charging Station</span></p>
+    <h3>EV Charging Stations</h3>
+    <div id="stations"></div>
+  </div>
+
+  <div id="map"></div>
+
+  <div id="reservation-image" class="hidden">
+    <img src="A_split-screen_digital_interface_displays_an_EV_ch.png" alt="Confirmation" />
+  </div>
+
+  <script>
+    let map, directionsService, directionsRenderer, currentLocation;
+
+    const stations = [
+      {
+        id: '1',
+        name: 'Tesla Supercharger',
+        lat: 23.2599,
+        lng: 77.4126,
+        address: '123 New Market, Bhopal',
+        connectorTypes: ['Tesla', 'CCS'],
+        available: true
+      },
+      {
+        id: '2',
+        name: 'Ather Grid',
+        lat: 23.27,
+        lng: 77.42,
+        address: '456 MP Nagar, Bhopal',
+        connectorTypes: ['Type 2', 'CHAdeMO'],
+        available: true
+      },
+      {
+        id: '3',
+        name: 'Tata Power EZ Charge',
+        lat: 23.25,
+        lng: 77.4,
+        address: '789 Habibganj, Bhopal',
+        connectorTypes: ['CCS', 'Type 2'],
+        available: false
+      }
+    ];
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 23.2599, lng: 77.4126 },
+        zoom: 13,
+      });
+
+      directionsService = new google.maps.DirectionsService();
+      directionsRenderer = new google.maps.DirectionsRenderer({ map });
+
+      getCurrentLocation();
+      renderStations();
+    }
+
+    function getCurrentLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          currentLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          new google.maps.Marker({
+            position: currentLocation,
+            map: map,
+            title: "Your Location",
+          });
+          map.setCenter(currentLocation);
+          // Update "From" field dynamically if you want
+          document.getElementById('from-location').textContent = `Lat: ${currentLocation.lat.toFixed(4)}, Lng: ${currentLocation.lng.toFixed(4)}`;
+        });
+      } else {
+        // If no geolocation, keep default "From" as Bhopal or something else
+        document.getElementById('from-location').textContent = 'Bhopal';
+      }
+    }
+
+    function renderStations() {
+      const container = document.getElementById("stations");
+      container.innerHTML = '';
+
+      stations.forEach((station) => {
+        const div = document.createElement("div");
+        div.className = `station ${station.available ? 'available' : 'busy'}`;
+        div.innerHTML = `
+          <strong>${station.name}</strong><br/>
+          <span>${station.address}</span><br/>
+          <small>${station.connectorTypes.join(', ')}</small><br/>
+          <button onclick="selectStation(${station.lat}, ${station.lng}, '${station.name}', '${station.address}')">Book Now</button>
+        `;
+        container.appendChild(div);
+
+        new google.maps.Marker({
+          position: { lat: station.lat, lng: station.lng },
+          map: map,
+          title: station.name,
+        });
+      });
+    }
+
+    function selectStation(lat, lng, name, address) {
+      if (!currentLocation) return;
+
+      directionsService.route(
+        {
+          origin: currentLocation,
+          destination: { lat, lng },
+          travelMode: google.maps.TravelMode.DRIVING,
+        },
+        (result, status) => {
+          if (status === "OK") {
+            directionsRenderer.setDirections(result);
+            document.getElementById("reservation-image").classList.remove("hidden");
+
+            // Update "To" field dynamically
+            document.getElementById('to-location').textContent = `${name}, ${address}`;
+          }
+        }
+      );
+    }
+
+    window.selectStation = selectStation;
+    window.initMap = initMap;
+  </script>
+
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4kgJZkycywUs0lzPe33zGrKpjzrBA-jw&callback=initMap&libraries=places">
+  </script>
+</body>
+</html>
+
+
